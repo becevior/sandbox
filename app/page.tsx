@@ -24,7 +24,6 @@ export default function Home() {
           src="/api/getImage"
           alt="Conner Beckwith Headshot"
           className="rounded-full w-64 h-64 object-cover shadow-lg"
-          priority="true"
         />
         <h1 className="text-3xl font-bold">Conner Beckwith</h1>
       </div>
