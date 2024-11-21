@@ -19,7 +19,14 @@ export default function Home() {
           </div>
         </div>
       </nav>
-      <h1>YOUR FACE</h1>
+      <div className="flex flex-col items-center gap-8">
+        <img
+          src="/api/getImage"
+          alt="Conner Beckwith Headshot"
+          className="rounded-full w-64 h-64 object-cover shadow-lg"
+        />
+        <h1 className="text-3xl font-bold">Conner Beckwith</h1>
+      </div>
     </div>
   );
 }
