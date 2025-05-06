@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
 type Position = {
@@ -11,6 +11,9 @@ type Position = {
 type Direction = 'right' | 'down' | 'left' | 'up';
 
 export default function MarinersLogo() {
+  // State to track visibility
+  const [isVisible, setIsVisible] = useState(true);
+  
   // Use refs to avoid state updates causing animation issues
   const positionRef = useRef<Position>({ x: 0, y: 0 });
   const directionRef = useRef<Direction>('right');
@@ -75,6 +78,14 @@ export default function MarinersLogo() {
   };
 
   useEffect(() => {
+    // If not visible, don't run the animation
+    if (!isVisible) {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      return;
+    }
+    
     // Get window dimensions
     const updateDimensions = () => {
       dimensionsRef.current = {
@@ -99,12 +110,21 @@ export default function MarinersLogo() {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, []);
+  }, [isVisible]);
+
+  // If not visible, render nothing
+  if (!isVisible) return null;
+
+  // Handle click to make logo disappear
+  const handleClick = () => {
+    setIsVisible(false);
+  };
 
   return (
     <div
       ref={logoRef}
-      className="fixed pointer-events-none z-50"
+      className="fixed z-50 cursor-pointer"
+      onClick={handleClick}
       style={{
         left: '0px',
         top: '0px',
