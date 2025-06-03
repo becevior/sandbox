@@ -20,6 +20,16 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Mortal Kombat Feature
+
+The project includes a Mortal Kombat themed battle animation featuring the Mariners Moose vs Oregon Duck. To make it work properly:
+
+1. Add the following audio files to the `/public/audio/` directory:
+   - `mortal-kombat-theme.mp3` - Mortal Kombat theme song
+   - `fatality.mp3` - Mortal Kombat fatality sound effect
+
+You can find these audio files from various sound effect libraries or create your own versions.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
