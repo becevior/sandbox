@@ -2,8 +2,16 @@
 
 import { useEffect, useRef } from 'react';
 
+interface Entity {
+  id: string;
+  x: number;
+  y: number;
+  char: string;
+  lastMoveTime: number;
+  steps: number;
+}
+
 export default function AsciiMazePage() {
-  const mazeRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -30,12 +38,12 @@ export default function AsciiMazePage() {
 
     // Maze state
     let maze: string[][] = [];
-    let entities: any[] = [];
+    let entities: Entity[] = [];
     let updateInterval: NodeJS.Timeout | null = null;
     let entityPaths = new Map();
     let entityPositions = new Map();
     let totalCharacters = 0;
-    let stars: any[] = [];
+    let stars: Entity[] = [];
     let currentHighestLetter = 'a';
     let lastLogTime = 0;
 
@@ -281,7 +289,7 @@ export default function AsciiMazePage() {
       }
     }
 
-    function calculateAttraction(entity: any, otherEntities: any[]) {
+    function calculateAttraction(entity: Entity, otherEntities: Entity[]) {
       let forceX = 0;
       let forceY = 0;
       
@@ -302,7 +310,7 @@ export default function AsciiMazePage() {
       return { forceX, forceY };
     }
 
-    function handleCollisions(posKey: string, positionMap: Map<string, any[]>) {
+    function handleCollisions(posKey: string, positionMap: Map<string, Entity[]>) {
       const entitiesAtPosition = positionMap.get(posKey) || [];
       
       if (entitiesAtPosition.length <= 1) {
@@ -332,7 +340,7 @@ export default function AsciiMazePage() {
           }
         }
       } else if (regularEntities.length > 0) {
-        const charGroups: { [key: string]: any[] } = {};
+        const charGroups: { [key: string]: Entity[] } = {};
         for (const entity of regularEntities) {
           if (!charGroups[entity.char]) {
             charGroups[entity.char] = [];
@@ -378,12 +386,12 @@ export default function AsciiMazePage() {
       });
       
       const removedIds = new Set();
-      for (const [posKey, entitiesAtPos] of currentPositions.entries()) {
+      currentPositions.forEach((entitiesAtPos, posKey) => {
         if (entitiesAtPos.length > 1) {
           const removed = handleCollisions(posKey, currentPositions);
           removed.forEach(id => removedIds.add(id));
         }
-      }
+      });
       
       entities = entities.filter(entity => !removedIds.has(entity.id));
       stars = stars.filter(star => !removedIds.has(star.id));
@@ -391,7 +399,7 @@ export default function AsciiMazePage() {
       removedIds.forEach(id => entityPaths.delete(id));
       
       const newPositions = new Map();
-      const movedEntities: any[] = [];
+      const movedEntities: Entity[] = [];
       
       entities.forEach(entity => {
         const updatedEntity = {...entity};
@@ -445,12 +453,12 @@ export default function AsciiMazePage() {
       });
       
       const postMoveRemovedIds = new Set();
-      for (const [posKey, entitiesAtPos] of newPositions.entries()) {
+      newPositions.forEach((entitiesAtPos, posKey) => {
         if (entitiesAtPos.length > 1) {
           const removed = handleCollisions(posKey, newPositions);
           removed.forEach(id => postMoveRemovedIds.add(id));
         }
-      }
+      });
       
       entities = movedEntities.filter(entity => !postMoveRemovedIds.has(entity.id));
       stars = stars.filter(star => !postMoveRemovedIds.has(star.id));
