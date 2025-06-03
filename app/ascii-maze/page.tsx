@@ -620,6 +620,14 @@ export default function AsciiMazePage() {
             startAnimation();
           }
           break;
+        case 'f':
+        case 'F':
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+          } else {
+            document.exitFullscreen();
+          }
+          break;
       }
     }
 
@@ -705,7 +713,7 @@ export default function AsciiMazePage() {
       `}</style>
       
       <div className="header">ASCII MAZE</div>
-      <div className="controls">Use ↑↓ keys to control speed</div>
+      <div className="controls">Use ↑↓ keys to control speed | Press F for fullscreen</div>
       <div 
         ref={canvasRef} 
         className="maze-canvas"
