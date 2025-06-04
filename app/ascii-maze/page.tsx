@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 interface Entity {
   id: string;
@@ -13,8 +14,13 @@ interface Entity {
 
 export default function AsciiMazePage() {
   const canvasRef = useRef<HTMLDivElement>(null);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
+    // Get start letter from URL params, default to 'a' if not provided or invalid
+    const startLetter = searchParams.get('start')?.toLowerCase() || 'a';
+    const validStartLetter = /^[a-z]$/.test(startLetter) ? startLetter : 'a';
+
     // Maze Configuration
     const config = {
       width: 60,
@@ -25,7 +31,7 @@ export default function AsciiMazePage() {
       spreadProbability: 0.05,
       minSpreadDistance: 5,
       mazeChars: ['-', '|'],
-      initialChar: 'a',
+      initialChar: validStartLetter,
       attractionRadius: 5,
       attractionStrength: 0.3,
       starCount: 10,
@@ -232,7 +238,8 @@ export default function AsciiMazePage() {
       
       const targetCount = calculateTargetEntityCount();
       const currentEntityCount = entities.filter(e => e.char !== '*').length;
-      const availableSlots = targetCount - currentEntityCount;
+      const expectedCollisionLoss = Math.floor(currentEntityCount * 0.1);
+      const availableSlots = targetCount - currentEntityCount + expectedCollisionLoss;
       
       if (availableSlots <= 0) return;
       
@@ -256,11 +263,16 @@ export default function AsciiMazePage() {
         }
       }
 
-      const batchSize = Math.min(
-        availableSlots,
-        config.seedBatchSize,
-        config.totalTarget - totalCharacters
-      );
+      const highestCharCode = highestChar.charCodeAt(0);
+      const isBeforeReduction = highestCharCode < config.reductionStartChar.charCodeAt(0);
+      
+      const batchSize = isBeforeReduction 
+        ? Math.min(availableSlots, config.totalTarget - totalCharacters)
+        : Math.min(
+            availableSlots,
+            config.seedBatchSize,
+            config.totalTarget - totalCharacters
+          );
 
       for (let i = 0; i < batchSize && validPositions.length > 0; i++) {
         const posIndex = Math.floor(Math.random() * validPositions.length);
@@ -475,6 +487,7 @@ export default function AsciiMazePage() {
     }
 
     function updateEntities() {
+      seedNewCharacters();
       moveEntities();
       seedNewCharacters();
       
@@ -605,7 +618,7 @@ export default function AsciiMazePage() {
     function handleKeyDown(e: KeyboardEvent) {
       switch(e.key) {
         case 'ArrowUp':
-          config.updateSpeed = Math.max(50, config.updateSpeed - 100);
+          config.updateSpeed = Math.max(10, config.updateSpeed - 10);
           console.log(`Speed increased - Current speed: ${config.updateSpeed}ms`);
           if (updateInterval) {
             clearInterval(updateInterval);
@@ -613,7 +626,7 @@ export default function AsciiMazePage() {
           }
           break;
         case 'ArrowDown':
-          config.updateSpeed = Math.min(2000, config.updateSpeed + 100);
+          config.updateSpeed = Math.min(2000, config.updateSpeed + 10);
           console.log(`Speed decreased - Current speed: ${config.updateSpeed}ms`);
           if (updateInterval) {
             clearInterval(updateInterval);
@@ -651,7 +664,7 @@ export default function AsciiMazePage() {
       document.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [searchParams]);
 
   return (
     <div className="ascii-maze">
