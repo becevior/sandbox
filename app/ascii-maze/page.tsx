@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 interface Entity {
@@ -12,7 +12,7 @@ interface Entity {
   steps: number;
 }
 
-export default function AsciiMazePage() {
+function AsciiMazeContent() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
 
@@ -732,5 +732,13 @@ export default function AsciiMazePage() {
         className="maze-canvas"
       />
     </div>
+  );
+}
+
+export default function AsciiMazePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AsciiMazeContent />
+    </Suspense>
   );
 }
