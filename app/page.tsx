@@ -30,6 +30,7 @@ export default function Home() {
                 <Link href="#" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 hover:text-white">Tickets</Link>
                 <Link href="/mortal-kombat" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 hover:text-white bg-red-800/50">Mortal Kombat</Link>
                 <Link href="/ascii-maze" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 hover:text-white bg-green-800/50">ASCII Maze</Link>
+                <a href="/tough-one" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 hover:text-white bg-blue-800/50">Tough One</a>
                 <Link href="#" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 hover:text-white">Shop</Link>
               </div>
             </div>
