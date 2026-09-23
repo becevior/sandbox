@@ -14,7 +14,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Wazaaaa",
+  title: "Conner Beckwith",
+  description: "Personal site for Conner Beckwith.",
 };
 
 export default function RootLayout({

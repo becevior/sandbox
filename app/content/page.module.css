@@ -1,0 +1,26 @@
+.page {
+  min-height: 100dvh;
+  background: #fff;
+  color: #111;
+  color-scheme: light;
+  font-family: system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.content {
+  max-width: 672px;
+  margin: 0 auto;
+  padding: 32px 16px;
+  overflow-wrap: break-word;
+}
+
+.content nav { margin-bottom: 32px; }
+.content a { color: #0000ee; text-decoration: underline; }
+.content a:visited { color: #551a8b; }
+.content a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+.content h1 { margin: 0 0 21px; font-size: 32px; font-weight: 700; }
+.content h2 { margin: 24px 0 16px; font-size: 24px; font-weight: 700; }
+.content p { margin: 16px 0; }
+.entries { list-style: none; margin: 0; padding: 0; }
+.entries li { margin-bottom: 32px; }

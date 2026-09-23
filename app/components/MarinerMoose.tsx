@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 type Position = {
   x: number;
@@ -8,6 +8,9 @@ type Position = {
 };
 
 type Direction = 'right' | 'down' | 'left' | 'up';
+
+const LOGO_SIZE = 80;
+const WALK_SPEED = 2;
 
 export default function MarinersLogo() {
   // Use refs to avoid state updates causing animation issues
@@ -17,13 +20,7 @@ export default function MarinersLogo() {
   const animationFrameRef = useRef<number | null>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   
-  // Size of the logo
-  const logoSize = 80;
-  // Walking speed (pixels per animation frame)
-  const speed = 2;
-
-  // Animation function
-  const animateWalk = () => {
+  const animateWalk = useCallback(() => {
     if (!logoRef.current) return;
     
     const dimensions = dimensionsRef.current;
@@ -33,28 +30,28 @@ export default function MarinersLogo() {
     // Move based on current direction
     switch (direction) {
       case 'right':
-        position.x += speed;
-        if (position.x >= dimensions.width - logoSize) {
-          position.x = dimensions.width - logoSize;
+        position.x += WALK_SPEED;
+        if (position.x >= dimensions.width - LOGO_SIZE) {
+          position.x = dimensions.width - LOGO_SIZE;
           direction = 'down';
         }
         break;
       case 'down':
-        position.y += speed;
-        if (position.y >= dimensions.height - logoSize) {
-          position.y = dimensions.height - logoSize;
+        position.y += WALK_SPEED;
+        if (position.y >= dimensions.height - LOGO_SIZE) {
+          position.y = dimensions.height - LOGO_SIZE;
           direction = 'left';
         }
         break;
       case 'left':
-        position.x -= speed;
+        position.x -= WALK_SPEED;
         if (position.x <= 0) {
           position.x = 0;
           direction = 'up';
         }
         break;
       case 'up':
-        position.y -= speed;
+        position.y -= WALK_SPEED;
         if (position.y <= 0) {
           position.y = 0;
           direction = 'right';
@@ -71,7 +68,7 @@ export default function MarinersLogo() {
     
     // Continue animation
     animationFrameRef.current = requestAnimationFrame(animateWalk);
-  };
+  }, []);
 
   useEffect(() => {
     // Get window dimensions
@@ -98,7 +95,7 @@ export default function MarinersLogo() {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, []);
+  }, [animateWalk]);
 
   return (
     <div
@@ -107,8 +104,8 @@ export default function MarinersLogo() {
       style={{
         left: '0px',
         top: '0px',
-        width: `${logoSize}px`,
-        height: `${logoSize}px`,
+        width: `${LOGO_SIZE}px`,
+        height: `${LOGO_SIZE}px`,
         transition: 'transform 0.2s ease-in-out'
       }}
     >
