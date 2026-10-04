@@ -1,18 +1,14 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Mortal Kombat - Mariners Moose vs Oregon Duck",
-  description: "An epic battle between the Mariners Moose and Oregon Duck in Mortal Kombat style",
+  title: "Mascot Kombat: Mariner Moose vs. Oregon Duck",
+  description: "A best-of-three arcade fight between the Mariner Moose and the Oregon Duck.",
 };
 
-export default function MortalKombatLayout({
+export default function MascotKombatLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <>
-      {children}
-    </>
-  );
-} 
+  return children;
+}

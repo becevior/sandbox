@@ -1,9 +1,5 @@
-import MortalKombatArena from '../components/MortalKombatArena';
+import MascotKombat from "../components/mascot-kombat/MascotKombat";
 
-export default function MortalKombatPage() {
-  return (
-    <main className="w-full min-h-screen">
-      <MortalKombatArena />
-    </main>
-  );
-} 
+export default function MascotKombatPage() {
+  return <MascotKombat />;
+}

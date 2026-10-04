@@ -6,6 +6,7 @@ import posthog from "posthog-js";
 import { posthogAppLogger } from "../posthog-logger";
 import { isPostHogEnabled } from "../posthog-provider";
 import styles from "../player-select.module.css";
+import ArcadeText from "./ArcadeText";
 
 type Destination = {
   href: string;
@@ -65,53 +66,6 @@ const destinations: Destination[] = [
 ];
 
 const lockedSlots = ["locked-1", "locked-2"];
-
-// The title and destination names share the same bitmap lettering.
-const arcadeGlyphs: Record<string, string[]> = {
-  A: ["01110", "11011", "11011", "11111", "11011", "11011", "11011"],
-  B: ["11110", "11011", "11011", "11110", "11011", "11011", "11110"],
-  C: ["01111", "11000", "11000", "11000", "11000", "11000", "01111"],
-  D: ["11110", "11011", "11011", "11011", "11011", "11011", "11110"],
-  H: ["11011", "11011", "11011", "11111", "11011", "11011", "11011"],
-  O: ["01110", "11011", "11011", "11011", "11011", "11011", "01110"],
-  S: ["01111", "11000", "11000", "01110", "00011", "00011", "11110"],
-  E: ["11111", "11000", "11000", "11110", "11000", "11000", "11111"],
-  Y: ["11011", "11011", "11011", "01110", "00100", "00100", "00100"],
-  U: ["11011", "11011", "11011", "11011", "11011", "11011", "01110"],
-  R: ["11110", "11011", "11011", "11110", "11100", "11010", "11011"],
-  F: ["11111", "11000", "11000", "11110", "11000", "11000", "11000"],
-  I: ["111", "010", "010", "010", "010", "010", "111"],
-  G: ["01111", "11000", "11000", "11011", "11011", "11011", "01111"],
-  T: ["11111", "00100", "00100", "00100", "00100", "00100", "00100"],
-  K: ["11011", "11011", "11010", "11100", "11010", "11011", "11011"],
-  L: ["11000", "11000", "11000", "11000", "11000", "11000", "11111"],
-  M: ["11011", "11111", "11111", "11011", "11011", "11011", "11011"],
-  N: ["11001", "11101", "11101", "11111", "11011", "11011", "11001"],
-  P: ["11110", "11011", "11011", "11110", "11000", "11000", "11000"],
-  Z: ["11111", "00011", "00110", "01100", "11000", "11000", "11111"],
-  "?": ["01110", "11011", "00011", "00110", "00100", "00000", "00100"],
-};
-
-function ArcadeText({ text }: { text: string }) {
-  let offset = 0;
-  const letters = Array.from(text.toUpperCase(), (letter, index) => {
-    if (letter === " ") {
-      offset += 4;
-      return null;
-    }
-    const glyph = arcadeGlyphs[letter] ?? arcadeGlyphs["?"];
-    const x = offset;
-    offset += glyph[0].length + 1.5;
-    return (
-      <g key={index} transform={`translate(${x} 0)`}>
-        {glyph.flatMap((row, y) => Array.from(row, (pixel, column) =>
-          pixel === "1" ? <rect key={`${y}-${column}`} x={column} y={y} width="1" height="1" /> : null
-        ))}
-      </g>
-    );
-  });
-  return <svg width={(offset + 2) * 2} height="27" viewBox={`-1 -1 ${offset + 2} 9`} preserveAspectRatio="none" aria-hidden="true">{letters}</svg>;
-}
 
 function StoneFrame() {
   const outline = "M 2,2 H 998 V 580 H 812 V 998 H 188 V 580 H 2 Z";
