@@ -18,9 +18,11 @@ const VOICE_LINES: VoiceLine[] = ["round1", "round2", "round3", "finalRound", "f
 // Every clip ends with ~0.9s of echo tail; the next line can start over it.
 const VOICE_TAIL = 0.85;
 
-// Optional recorded soundtrack (e.g. "/audio/mascot-kombat-theme.mp3"). When null,
-// or if it fails to load, the synthesized loop below plays instead.
-const MUSIC_TRACK: string | null = null;
+// Recorded soundtrack: "arena" from ~/workplace/mk-remix/generate.py, rendered
+// without its vocal shouts and with the reverb tail folded into the start so it
+// loops seamlessly. Set to null (or if it fails to load) to use the synthesized
+// loop below instead.
+const MUSIC_TRACK: string | null = "/audio/mascot-kombat-theme.mp3";
 
 const fetchAudio = (url: string) => fetch(url).then((r) => (r.ok ? r.arrayBuffer() : null)).catch(() => null);
 
