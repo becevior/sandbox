@@ -223,8 +223,10 @@ export default function PlayerSelect({ emblem, contentPortrait, mazePortrait, na
               title={destination.detail}
               onPointerEnter={(event) => { if (event.pointerType === "mouse") setSelectedIndex(index); }}
               onFocus={() => setSelectedIndex(index)}
-              onClick={() => setSelectedIndex(index)}
-              onDoubleClick={() => navigate(destination)}
+              onClick={() => {
+                setSelectedIndex(index);
+                navigate(destination);
+              }}
             >
               <span
                 className={styles.portraitArt}
