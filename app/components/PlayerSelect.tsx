@@ -4,11 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import posthog from "posthog-js";
 import { posthogAppLogger } from "../posthog-logger";
+import { isPostHogEnabled } from "../posthog-provider";
 import styles from "../player-select.module.css";
-
-const isPostHogConfigured =
-  Boolean(process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN) &&
-  Boolean(process.env.NEXT_PUBLIC_POSTHOG_HOST);
 
 type Destination = {
   href: string;
@@ -153,7 +150,7 @@ export default function PlayerSelect({ emblem, contentPortrait, mazePortrait, na
   const navigate = useCallback((destination: Destination) => {
     const destinationType = destination.href.startsWith("http") ? "external" : "internal";
 
-    if (isPostHogConfigured) {
+    if (isPostHogEnabled) {
       posthog.capture("destination_opened", {
         destination_code: destination.code,
         destination_type: destinationType,

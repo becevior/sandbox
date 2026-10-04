@@ -4,26 +4,19 @@ import posthog from "posthog-js";
 import type { ReactNode } from "react";
 
 const projectToken = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;
-const host = process.env.NEXT_PUBLIC_POSTHOG_HOST;
+// Proxied through our own domain via the /ingest rewrites in next.config.mjs.
+const host = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "/ingest";
 
-if (!projectToken) {
-  if (process.env.NODE_ENV === "development") {
-    throw new Error(
-      "NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN variable required by PostHog is missing or un-configured, this causes events to be silently missed. This error stops appearing once NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN is configured"
-    );
-  }
-} else if (!host) {
-  if (process.env.NODE_ENV === "development") {
-    throw new Error(
-      "NEXT_PUBLIC_POSTHOG_HOST variable required by PostHog is missing or un-configured, this causes events to be silently missed. This error stops appearing once NEXT_PUBLIC_POSTHOG_HOST is configured"
-    );
-  }
-} else {
-  posthog.init(projectToken, {
+// Only send analytics from deployed builds, never from the local dev server.
+export const isPostHogEnabled =
+  Boolean(projectToken) && process.env.NODE_ENV === "production";
+
+if (isPostHogEnabled && typeof window !== "undefined") {
+  posthog.init(projectToken!, {
     api_host: host,
+    ui_host: "https://us.posthog.com",
     defaults: "2026-05-30",
     capture_exceptions: true,
-    debug: process.env.NODE_ENV === "development",
   });
 }
 

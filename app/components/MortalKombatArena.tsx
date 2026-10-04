@@ -3,12 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 import posthog from 'posthog-js';
 import { posthogAppLogger } from '../posthog-logger';
+import { isPostHogEnabled } from '../posthog-provider';
 import MarinerMoose from './MarinerMoose';
 import OregonDuck from './OregonDuck';
-
-const isPostHogConfigured =
-  Boolean(process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN) &&
-  Boolean(process.env.NEXT_PUBLIC_POSTHOG_HOST);
 
 export default function MortalKombatArena() {
   const [battleStarted, setBattleStarted] = useState(false);
@@ -44,7 +41,7 @@ export default function MortalKombatArena() {
   const startBattle = () => {
     setBattleStarted(true);
 
-    if (isPostHogConfigured) {
+    if (isPostHogEnabled) {
       posthog.capture('battle_started');
     }
     posthogAppLogger.battleStarted();
@@ -74,7 +71,7 @@ export default function MortalKombatArena() {
           clearInterval(battleInterval);
           setWinner("OREGON DUCK");
           setFightText("FATALITY");
-          if (isPostHogConfigured) {
+          if (isPostHogEnabled) {
             posthog.capture('battle_completed', { winner: 'oregon_duck' });
           }
           posthogAppLogger.battleCompleted('oregon_duck');
@@ -89,7 +86,7 @@ export default function MortalKombatArena() {
           clearInterval(battleInterval);
           setWinner("MARINERS MOOSE");
           setFightText("FATALITY");
-          if (isPostHogConfigured) {
+          if (isPostHogEnabled) {
             posthog.capture('battle_completed', { winner: 'mariners_moose' });
           }
           posthogAppLogger.battleCompleted('mariners_moose');
