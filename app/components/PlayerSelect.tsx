@@ -151,10 +151,15 @@ export default function PlayerSelect({ emblem, contentPortrait, mazePortrait, na
     const destinationType = destination.href.startsWith("http") ? "external" : "internal";
 
     if (isPostHogEnabled) {
-      posthog.capture("destination_opened", {
-        destination_code: destination.code,
-        destination_type: destinationType,
-      });
+      posthog.capture(
+        "destination_opened",
+        {
+          destination_code: destination.code,
+          destination_type: destinationType,
+        },
+        // External destinations navigate away immediately, so send now via beacon instead of batching.
+        { send_instantly: true, transport: "sendBeacon" },
+      );
     }
     posthogAppLogger.destinationOpened(destinationType);
 
