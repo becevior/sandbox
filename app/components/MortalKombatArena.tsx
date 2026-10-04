@@ -1,8 +1,14 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import posthog from 'posthog-js';
+import { posthogAppLogger } from '../posthog-logger';
 import MarinerMoose from './MarinerMoose';
 import OregonDuck from './OregonDuck';
+
+const isPostHogConfigured =
+  Boolean(process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN) &&
+  Boolean(process.env.NEXT_PUBLIC_POSTHOG_HOST);
 
 export default function MortalKombatArena() {
   const [battleStarted, setBattleStarted] = useState(false);
@@ -37,6 +43,11 @@ export default function MortalKombatArena() {
   
   const startBattle = () => {
     setBattleStarted(true);
+
+    if (isPostHogConfigured) {
+      posthog.capture('battle_started');
+    }
+    posthogAppLogger.battleStarted();
     
     // Play theme song
     if (audioRef.current && audioLoaded) {
@@ -63,6 +74,10 @@ export default function MortalKombatArena() {
           clearInterval(battleInterval);
           setWinner("OREGON DUCK");
           setFightText("FATALITY");
+          if (isPostHogConfigured) {
+            posthog.capture('battle_completed', { winner: 'oregon_duck' });
+          }
+          posthogAppLogger.battleCompleted('oregon_duck');
           playFatalitySound();
         }
         return newHealth;
@@ -74,6 +89,10 @@ export default function MortalKombatArena() {
           clearInterval(battleInterval);
           setWinner("MARINERS MOOSE");
           setFightText("FATALITY");
+          if (isPostHogConfigured) {
+            posthog.capture('battle_completed', { winner: 'mariners_moose' });
+          }
+          posthogAppLogger.battleCompleted('mariners_moose');
           playFatalitySound();
         }
         return newHealth;
