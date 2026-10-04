@@ -1,0 +1,382 @@
+.screen {
+  --stone: url('/arcade-stone.png');
+  --yellow: #fff500;
+  --select: #20ff00;
+  --pad-space: 0px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 100dvh;
+  padding: 12px;
+  background: #222 var(--stone) repeat;
+  background-size: 360px;
+  background-blend-mode: multiply;
+  color: #e8e8d8;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.stage {
+  position: relative;
+  container-type: size;
+  width: min(100%, calc((100dvh - 104px - var(--pad-space)) * 16 / 9));
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #696969 var(--stone) repeat;
+  background-size: 300px;
+  background-blend-mode: soft-light;
+  outline: 5px ridge #8a8a80;
+  box-shadow: 0 0 0 9px #262626, 0 12px 40px #000a;
+}
+
+.stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .08;
+  background: repeating-linear-gradient(0deg, #000 0 1px, transparent 1px 3px);
+}
+
+.world {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.flame {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: flicker 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes flicker {
+  0% { transform: scale(1, 1) skewX(0deg); }
+  40% { transform: scale(.92, 1.08) skewX(-4deg); }
+  100% { transform: scale(1.04, .94) skewX(3deg); }
+}
+
+/* HUD */
+
+.hud {
+  position: absolute;
+  inset: 3.5cqh 3cqw auto;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: start;
+  gap: 2.5cqw;
+}
+
+.player { display: flex; flex-direction: column; gap: 1cqh; }
+.right { align-items: flex-end; }
+
+.bar {
+  position: relative;
+  width: 100%;
+  height: 5.6cqh;
+  background: #a3120f;
+  outline: 0.4cqh solid #e8e8d8;
+  box-shadow: 0 0 0 0.9cqh #111;
+}
+
+.barFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(#3ee35a, #13a32e 60%, #0b7a21);
+  transition: width 120ms linear;
+}
+
+.right .barFill { inset: 0 0 0 auto; }
+
+.barName {
+  position: absolute;
+  top: 50%;
+  left: 1.2cqw;
+  height: 3cqh;
+  transform: translateY(-50%) skewX(-7deg);
+  fill: var(--yellow);
+  filter: drop-shadow(0.2cqh 0.2cqh 0 #000);
+}
+
+.right .barName { left: auto; right: 1.2cqw; }
+
+.wins { display: flex; gap: 0.6cqw; height: 4.4cqh; }
+
+.medallion {
+  aspect-ratio: 1;
+  height: 100%;
+  background: url('/arcade-medallion.png') center / contain no-repeat;
+  filter: drop-shadow(0 0.2cqh 0.2cqh #000);
+}
+
+.timer { padding-top: 0.2cqh; }
+
+.timerText {
+  display: block;
+  height: 7.5cqh;
+  fill: var(--yellow);
+  transform: skewX(-7deg);
+  filter: drop-shadow(0.3cqh 0.3cqh 0 #000);
+}
+
+/* Announcer */
+
+.banner,
+.pause {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2cqh;
+  padding-top: 15cqh;
+  pointer-events: none;
+}
+
+.banner { animation: slam 220ms cubic-bezier(.2, 1.6, .4, 1) both; }
+
+@keyframes slam {
+  from { transform: scale(1.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.bannerText {
+  height: 11cqh;
+  max-width: 92cqw;
+  transform: skewX(-7deg);
+  filter: drop-shadow(0.5cqh 0.5cqh 0 #000) drop-shadow(0 0 1.4cqh #000c);
+}
+
+.bannerSub {
+  height: 4.5cqh;
+  max-width: 90cqw;
+  fill: #e8e8d8;
+  transform: skewX(-7deg);
+  filter: drop-shadow(0.3cqh 0.3cqh 0 #000);
+}
+
+.red .bannerText { fill: #e3141b; }
+.yellow .bannerText { fill: var(--yellow); }
+
+.pause {
+  pointer-events: auto;
+  justify-content: center;
+  padding-top: 0;
+  background: #000a;
+}
+
+.pause .bannerText { fill: var(--yellow); }
+
+/* Menu */
+
+.menu {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 7cqh;
+  background: linear-gradient(#000b, #0000 55%);
+}
+
+.title {
+  height: 15cqh;
+  max-width: 90cqw;
+  fill: var(--yellow);
+  transform: skewX(-7deg);
+  filter: drop-shadow(0.6cqh 0.6cqh 0 #000);
+}
+
+.matchup {
+  margin-top: 2cqh;
+  color: #e8e8d8;
+  font: italic 3.6cqh / 1 Impact, 'Arial Narrow', sans-serif;
+  letter-spacing: 0.04em;
+  text-shadow: 0.25cqh 0.25cqh 0 #000;
+}
+
+.modes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.6cqh 1.6cqw;
+  margin-top: 5cqh;
+  width: min(58cqw, 620px);
+}
+
+.modeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 9cqh;
+  padding: 0 2cqw;
+  border: 0.5cqh solid #262626;
+  outline: 0.4cqh solid #a0a09a;
+  outline-offset: -0.9cqh;
+  background: #555 var(--stone) repeat;
+  background-size: 200px;
+  background-blend-mode: multiply;
+  color: var(--yellow);
+  cursor: pointer;
+}
+
+.modeButton svg {
+  height: 3.6cqh;
+  max-width: 100%;
+  fill: currentColor;
+  transform: skewX(-7deg);
+  filter: drop-shadow(0.25cqh 0.25cqh 0 #000);
+}
+
+.modeButton:hover,
+.modeButton:focus-visible {
+  outline-color: var(--select);
+  box-shadow: 0 0 0 0.5cqh var(--select);
+}
+
+.modeButton:focus-visible { outline-width: 0.6cqh; }
+
+.endActions {
+  position: absolute;
+  left: 50%;
+  bottom: 9cqh;
+  display: flex;
+  gap: 1.6cqw;
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+.endActions .modeButton { width: 22cqw; }
+
+.pause .endActions { position: static; transform: none; }
+
+/* Footer + controls */
+
+.footer {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  width: min(100%, calc((100dvh - 104px - var(--pad-space)) * 16 / 9));
+  min-height: 40px;
+  font: 12px / 1.4 var(--font-geist-mono), monospace;
+  color: #b8b8a9;
+}
+
+.footerLink {
+  padding: 6px 2px;
+  border: 0;
+  background: none;
+  color: #e8e8d8;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.footerLink:hover { color: var(--yellow); }
+
+.footerLink:focus-visible {
+  outline: 2px solid var(--select);
+  outline-offset: 2px;
+}
+
+.hints {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 18px;
+}
+
+.hintGroup { display: inline-flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
+.hintGroup strong { color: var(--yellow); font-weight: 600; }
+
+.hint { display: inline-flex; gap: 3px; align-items: center; }
+
+.hint kbd {
+  min-width: 20px;
+  margin-right: 2px;
+  padding: 1px 5px;
+  border: 1px solid #77776d;
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  background: #2c2c29;
+  color: #e8e8d8;
+  font: inherit;
+  text-align: center;
+}
+
+.touchPad { display: none; }
+
+@media (pointer: coarse) {
+  .screen { --pad-space: 150px; }
+  .keyboardOnly { display: none; }
+  .hints { display: none; }
+
+  .touchPad {
+    display: flex;
+    justify-content: space-between;
+    width: min(100%, 720px);
+    gap: 16px;
+    touch-action: none;
+  }
+
+  .move,
+  .attack { display: grid; gap: 8px; }
+  .move { grid-template-columns: repeat(3, 56px); }
+  .move .touchButton:last-child { grid-column: 1 / -1; }
+  .attack { grid-template-columns: repeat(2, 72px); }
+  .attack .touchButton:last-child { grid-column: 1 / -1; }
+
+  .touchButton {
+    height: 52px;
+    border: 3px solid #262626;
+    outline: 2px solid #a0a09a;
+    outline-offset: -6px;
+    background: #555 var(--stone) repeat;
+    background-size: 160px;
+    background-blend-mode: multiply;
+    color: var(--yellow);
+    font: italic 18px / 1 Impact, 'Arial Narrow', sans-serif;
+    touch-action: none;
+  }
+
+  .touchButton:active { outline-color: var(--select); }
+}
+
+/* Phones held sideways: put the pads in the gutters beside the stage. */
+@media (pointer: coarse) and (orientation: landscape) {
+  .screen { --pad-space: 0px; }
+
+  .touchPad {
+    position: fixed;
+    inset: auto 10px 10px;
+    width: auto;
+    align-items: flex-end;
+    pointer-events: none;
+  }
+
+  .move,
+  .attack { pointer-events: auto; }
+  .move,
+  .attack { gap: 6px; }
+  .move { grid-template-columns: repeat(3, 40px); }
+  .attack { grid-template-columns: repeat(2, 58px); }
+  .touchButton { height: 42px; font-size: 14px; }
+}
+
+@media (max-width: 640px) {
+  .modes { width: 80cqw; }
+  .footer { grid-template-columns: auto auto; justify-content: space-between; }
+  .hints { grid-column: 1 / -1; grid-row: 2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flame,
+  .banner { animation: none; }
+  .barFill { transition: none; }
+}
