@@ -20,7 +20,7 @@ import {
   type Input,
 } from "./engine";
 import { FighterSprite, ProjectileSprite } from "./fighters";
-import { createSound, type Sound } from "./sound";
+import { createSound, preloadAnnouncer, type Sound } from "./sound";
 import styles from "./mascot-kombat.module.css";
 
 type Mode = { kind: "solo"; human: 0 | 1 } | { kind: "versus" } | { kind: "watch" };
@@ -173,6 +173,7 @@ export default function MascotKombat() {
 
   useEffect(() => {
     calmMotion.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    preloadAnnouncer();
     const stored = window.localStorage.getItem("mascot-kombat-sound");
     if (stored === "off") setSoundOn(false);
   }, []);
@@ -196,7 +197,8 @@ export default function MascotKombat() {
     for (const event of game.events) {
       if (event.type === "sound") sound?.play(event.name);
       if (event.type === "say") {
-        sound?.say(event.text);
+        sound?.say(event.line, event.text);
+        if (event.line === "finishHim") sound?.tension();
         setAnnouncement(event.text);
       }
       if (event.type === "matchOver") {
@@ -472,7 +474,7 @@ export default function MascotKombat() {
               <KeyHint keys={["Esc"]} label="pause" />
             </>
           ) : (
-            <span>Best of three rounds. Finish the job with a throw.</span>
+            <span>Best of three rounds. Win the last one and you get a fatality.</span>
           )}
         </div>
         <button type="button" className={styles.footerLink} onClick={toggleSound} aria-pressed={soundOn}>

@@ -55,11 +55,14 @@ export type Particle = { x: number; y: number; vx: number; vy: number; life: num
 
 export type Phase = "menu" | "intro" | "fight" | "finish" | "fatality" | "roundOver" | "matchOver";
 
+// Announcer clips in public/audio/announcer (see scripts/generate-announcer.sh).
+export type VoiceLine = "round1" | "round2" | "round3" | "finalRound" | "fight" | "finishHim" | "fatality" | "flawless" | "mooseWins" | "duckWins" | "draw";
+
 export type Banner = { text: string; sub?: string; tone: "red" | "yellow" };
 
 export type GameEvent =
   | { type: "sound"; name: "punch" | "kick" | "block" | "throw" | "jump" | "ko" | "fatality" | "whiff" }
-  | { type: "say"; text: string }
+  | { type: "say"; line: VoiceLine | null; text: string }
   | { type: "matchOver"; winner: FighterId; fatality: boolean; flawless: boolean };
 
 export type Game = {
@@ -73,6 +76,8 @@ export type Game = {
   banner: Banner | null;
   roundWinner: 0 | 1 | null;
   fatality: boolean;
+  // An attack pressed during "Finish him!" while the winner was still airborne.
+  fatalityQueued: boolean;
   shake: number;
   flash: number;
   events: GameEvent[];
@@ -149,6 +154,7 @@ export function createGame(): Game {
     banner: null,
     roundWinner: null,
     fatality: false,
+    fatalityQueued: false,
     shake: 0,
     flash: 0,
     events: [],
@@ -171,11 +177,13 @@ function startRound(game: Game) {
   game.particles = [];
   game.timer = ROUND_SECONDS;
   game.roundWinner = null;
+  game.fatalityQueued = false;
   setPhase(game, "intro");
   const finalRound = game.fighters.every((f) => f.wins === WINS_NEEDED - 1);
   const label = finalRound ? "Final round" : `Round ${game.round}`;
   game.banner = { text: label, tone: "yellow" };
-  game.events.push({ type: "say", text: label });
+  const line: VoiceLine | null = finalRound ? "finalRound" : game.round <= 3 ? (`round${game.round}` as VoiceLine) : null;
+  game.events.push({ type: "say", line, text: label });
 }
 
 function setPhase(game: Game, phase: Phase) {
@@ -213,12 +221,13 @@ function controlFighter(game: Game, f: Fighter, input: Input) {
   const canAct = game.phase === "fight" || (game.phase === "finish" && f.action !== "dizzy");
   if (!canAct || isBusy(f)) return;
 
-  if (input.special && f.specialCooldown <= 0) {
+  // During "Finish him!" attack buttons trigger the fatality instead (see step).
+  if (game.phase === "fight" && input.special && f.specialCooldown <= 0) {
     setAction(f, "special");
     if (grounded) f.vx = 0;
     return;
   }
-  if (input.punch || input.kick) {
+  if (game.phase === "fight" && (input.punch || input.kick)) {
     setAction(f, input.kick ? "kick" : "punch");
     if (grounded) f.vx = 0;
     return;
@@ -254,17 +263,6 @@ function landHit(game: Game, attacker: Fighter, defender: Fighter, damage: numbe
   const blocking = defender.action === "block" && defender.y <= 0 && defender.facing === -attacker.facing;
   const dir = Math.sign(defender.x - attacker.x) || attacker.facing;
 
-  if (defender.action === "dizzy") {
-    // Hitting a dizzy opponent knocks them out without the fatality.
-    defender.hp = 0;
-    setAction(defender, "ko");
-    defender.vx = dir * 300;
-    game.events.push({ type: "sound", name: "ko" });
-    burst(game, hitX, hitY, FIGHTER_INFO[defender.id].fur, 18);
-    endRound(game, game.fighters.indexOf(attacker) as 0 | 1, false);
-    return;
-  }
-
   if (blocking) {
     defender.hp = Math.max(0, defender.hp - damage * 0.15);
     defender.vx = dir * knockback * 0.5;
@@ -296,8 +294,8 @@ function knockOut(game: Game, winnerIndex: 0 | 1) {
     if (winner.action !== "jump") setAction(winner, "idle");
     setPhase(game, "finish");
     game.roundWinner = winnerIndex;
-    game.banner = { text: "Finish him!", sub: `Press throw for the ${FIGHTER_INFO[winner.id].fatality.toLowerCase()}`, tone: "red" };
-    game.events.push({ type: "say", text: "Finish him!" });
+    game.banner = { text: "Finish him!", sub: `Press any attack for the ${FIGHTER_INFO[winner.id].fatality.toLowerCase()}`, tone: "red" };
+    game.events.push({ type: "say", line: "finishHim", text: "Finish him!" });
     return;
   }
   setAction(loser, "ko");
@@ -311,7 +309,7 @@ function endRound(game: Game, winnerIndex: 0 | 1 | null, fatality: boolean) {
   if (winnerIndex === null) {
     setPhase(game, "roundOver");
     game.banner = { text: "Draw", tone: "yellow" };
-    game.events.push({ type: "say", text: "Draw" });
+    game.events.push({ type: "say", line: "draw", text: "Draw" });
     return;
   }
   const winner = game.fighters[winnerIndex];
@@ -325,8 +323,15 @@ function endRound(game: Game, winnerIndex: 0 | 1 | null, fatality: boolean) {
   game.banner = fatality
     ? { text: "Fatality", sub: FIGHTER_INFO[winner.id].fatality, tone: "red" }
     : { text: winText, sub: flawless ? "Flawless victory" : undefined, tone: "yellow" };
-  if (!fatality) game.events.push({ type: "say", text: `${winner.name} wins${flawless ? ". Flawless victory" : ""}` });
+  if (!fatality) {
+    announceWinner(game, winner);
+    if (flawless) game.events.push({ type: "say", line: "flawless", text: "Flawless victory" });
+  }
   if (matchOver) game.events.push({ type: "matchOver", winner: winner.id, fatality, flawless });
+}
+
+function announceWinner(game: Game, winner: Fighter) {
+  game.events.push({ type: "say", line: winner.id === "moose" ? "mooseWins" : "duckWins", text: `${winner.name} wins` });
 }
 
 function startFatality(game: Game, winnerIndex: 0 | 1) {
@@ -359,14 +364,14 @@ function updateFatality(game: Game) {
   }
   if (game.phaseTime >= 1.6 && !game.banner) {
     game.banner = { text: "Fatality", sub: FIGHTER_INFO[winner.id].fatality, tone: "red" };
-    game.events.push({ type: "say", text: "Fatality" });
+    game.events.push({ type: "say", line: "fatality", text: "Fatality" });
   }
   if (game.phaseTime >= 3.6) {
     setAction(winner, "win");
     game.roundWinner = null;
     endRound(game, winnerIndex, true);
     game.banner = { text: `${winner.id === "moose" ? "Moose" : "Duck"} wins`, sub: "Fatality", tone: "yellow" };
-    game.events.push({ type: "say", text: `${winner.name} wins` });
+    announceWinner(game, winner);
   }
 }
 
@@ -476,7 +481,7 @@ export function step(game: Game, inputs: [Input, Input], dt: number) {
   if (game.phase === "intro") {
     if (game.phaseTime >= 1.4 && game.banner?.text !== "Fight!") {
       game.banner = { text: "Fight!", tone: "red" };
-      game.events.push({ type: "say", text: "Fight!" });
+      game.events.push({ type: "say", line: "fight", text: "Fight!" });
       setPhase(game, "fight");
     }
   } else if (game.phase === "fight") {
@@ -490,7 +495,9 @@ export function step(game: Game, inputs: [Input, Input], dt: number) {
   } else if (game.phase === "finish") {
     const winnerIndex = game.roundWinner as 0 | 1;
     const winner = game.fighters[winnerIndex];
-    if (inputs[winnerIndex].special && winner.y <= 0 && !isBusy(winner)) {
+    const input = inputs[winnerIndex];
+    if (input.punch || input.kick || input.special) game.fatalityQueued = true;
+    if (game.fatalityQueued && winner.y <= 0) {
       startFatality(game, winnerIndex);
     } else if (game.phaseTime >= FINISH_WINDOW) {
       const loser = game.fighters[1 - winnerIndex];
